@@ -58,15 +58,6 @@ def utility_processor():
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-def get_db_connection():
-    try:
-        conn = sqlite3.connect(get_db_path())
-        conn.row_factory = sqlite3.Row
-        return conn
-    except sqlite3.Error as e:
-        logger.error(f"Database connection error: {e}")
-        raise
-
 def generate_time_slots(start_time, end_time, break_start=None, break_end=None, interval=15):
     slots = []
     current_time = datetime.strptime(start_time, '%H:%M')
