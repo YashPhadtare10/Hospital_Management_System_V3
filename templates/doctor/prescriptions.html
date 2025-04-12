@@ -197,10 +197,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('medicinesContainer');
     const medicineCountInput = document.getElementById('medicine_count');
     
+    function updateMedicineCount() {
+        const count = document.querySelectorAll('.medicine-row').length;
+        medicineCountInput.value = count;
+    }
+    
     // Add medicine row
     document.getElementById('addMedicine').addEventListener('click', function() {
         const count = document.querySelectorAll('.medicine-row').length + 1;
-        medicineCountInput.value = count;
         
         const newRow = document.createElement('div');
         newRow.className = 'medicine-row mb-3 border-bottom pb-3';
@@ -218,41 +222,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="text" name="medicine_frequency_${count}" class="form-control mb-2" 
                         placeholder="Frequency" required>
                 </div>
-                <div class="col-md-3">
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" name="medicine_morning_${count}" class="form-check-input" id="morning_${count}" value="1">
-                        <label class="form-check-label" for="morning_${count}">Morning</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" name="medicine_afternoon_${count}" class="form-check-input" id="afternoon_${count}" value="1">
-                        <label class="form-check-label" for="afternoon_${count}">Afternoon</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input type="checkbox" name="medicine_evening_${count}" class="form-check-input" id="evening_${count}" value="1">
-                        <label class="form-check-label" for="evening_${count}">Evening</label>
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <select name="medicine_meal_${count}" class="form-select mb-2">
-                        <option value="before">Before Meal</option>
-                        <option value="after" selected>After Meal</option>
-                    </select>
-                </div>
             </div>
             <button type="button" class="btn btn-sm btn-danger removeMedicine mt-2">
                 <i class="fas fa-trash"></i> Remove
             </button>
         `;
+        
         container.appendChild(newRow);
+        updateMedicineCount();
     });
     
     // Remove medicine row
     container.addEventListener('click', function(e) {
-        if (e.target.closest('.removeMedicine')) {
-            const row = e.target.closest('.medicine-row');
-            if (document.querySelectorAll('.medicine-row').length > 1) {
+        if (e.target.classList.contains('removeMedicine') || 
+            e.target.closest('.removeMedicine')) {
+            const medicineRows = document.querySelectorAll('.medicine-row');
+            if (medicineRows.length > 1) {
+                const row = e.target.closest('.medicine-row');
                 row.remove();
-                medicineCountInput.value = document.querySelectorAll('.medicine-row').length;
+                updateMedicineCount();
             } else {
                 alert('At least one medicine is required');
             }
