@@ -194,11 +194,13 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('medicinesContainer');
+    const medicineCountInput = document.getElementById('medicine_count');
+    
     // Add medicine row
     document.getElementById('addMedicine').addEventListener('click', function() {
-        const container = document.getElementById('medicinesContainer');
         const count = document.querySelectorAll('.medicine-row').length + 1;
-        document.getElementById('medicine_count').value = count;
+        medicineCountInput.value = count;
         
         const newRow = document.createElement('div');
         newRow.className = 'medicine-row mb-3 border-bottom pb-3';
@@ -218,22 +220,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <div class="col-md-3">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="medicine_morning_${count}" value="1">
-                        <label class="form-check-label">Morning</label>
+                        <input type="checkbox" name="medicine_morning_${count}" class="form-check-input" id="morning_${count}">
+                        <label class="form-check-label" for="morning_${count}">Morning</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="medicine_afternoon_${count}" value="1">
-                        <label class="form-check-label">Afternoon</label>
+                        <input type="checkbox" name="medicine_afternoon_${count}" class="form-check-input" id="afternoon_${count}">
+                        <label class="form-check-label" for="afternoon_${count}">Afternoon</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" name="medicine_evening_${count}" value="1">
-                        <label class="form-check-label">Evening</label>
+                        <input type="checkbox" name="medicine_evening_${count}" class="form-check-input" id="evening_${count}">
+                        <label class="form-check-label" for="evening_${count}">Evening</label>
                     </div>
                 </div>
                 <div class="col-md-2">
-                    <select name="medicine_meal_${count}" class="form-select">
-                        <option value="before">Before meal</option>
-                        <option value="after" selected>After meal</option>
+                    <select name="medicine_meal_${count}" class="form-select mb-2">
+                        <option value="before">Before Meal</option>
+                        <option value="after" selected>After Meal</option>
                     </select>
                 </div>
             </div>
@@ -241,29 +243,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 <i class="fas fa-trash"></i> Remove
             </button>
         `;
-        
         container.appendChild(newRow);
     });
     
     // Remove medicine row
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('removeMedicine')) {
+    container.addEventListener('click', function(e) {
+        if (e.target.closest('.removeMedicine')) {
             const row = e.target.closest('.medicine-row');
-            row.remove();
-            
-            // Update medicine count
-            const count = document.querySelectorAll('.medicine-row').length;
-            document.getElementById('medicine_count').value = count;
-            
-            // Rename all inputs to maintain sequence
-            const rows = document.querySelectorAll('.medicine-row');
-            rows.forEach((row, index) => {
-                const num = index + 1;
-                row.querySelectorAll('input, select').forEach(input => {
-                    const name = input.name.replace(/_\d+$/, '') + '_' + num;
-                    input.name = name;
-                });
-            });
+            if (document.querySelectorAll('.medicine-row').length > 1) {
+                row.remove();
+                medicineCountInput.value = document.querySelectorAll('.medicine-row').length;
+            } else {
+                alert('At least one medicine is required');
+            }
         }
     });
 });
