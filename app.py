@@ -841,33 +841,40 @@ def prescriptions(appointment_id):
             return redirect(url_for('doctor_appointments'))
         
         if request.method == 'POST':
-            diagnosis = request.form.get('diagnosis', '').strip()
-            medicines = []
-            
-            medicine_count = int(request.form.get('medicine_count', 1))
-            
-            for i in range(1, medicine_count + 1):
-                name = request.form.get(f'medicine_name_{i}', '').strip()
-                dosage = request.form.get(f'medicine_dosage_{i}', '').strip()
-                frequency = request.form.get(f'medicine_frequency_{i}', '').strip()
-                
-                if name and dosage and frequency:
-                    morning = '1' if request.form.get(f'medicine_morning_{i}') else '0'
-                    afternoon = '1' if request.form.get(f'medicine_afternoon_{i}') else '0'
-                    evening = '1' if request.form.get(f'medicine_evening_{i}') else '0'
-                    meal = request.form.get(f'medicine_meal_{i}', 'after')
-                    
-                    medicine_str = f"{name}|{dosage}|{frequency}|{morning}|{afternoon}|{evening}|{meal}"
-                    medicines.append(medicine_str)
-            
-            instructions = request.form.get('instructions', '').strip()
-            medicines_str = '\n'.join(medicines) if medicines else ''
-            
-            # Get next appointment details
-            next_appointment_date = request.form.get('next_appointment_date', '').strip()
-            next_appointment_time = request.form.get('next_appointment_time', '').strip()
-
             try:
+                diagnosis = request.form.get('diagnosis', '').strip()
+                if not diagnosis:
+                    flash('Diagnosis is required', 'danger')
+                    return redirect(url_for('prescriptions', appointment_id=appointment_id))
+                
+                medicines = []
+                medicine_count = int(request.form.get('medicine_count', 1))
+                
+                for i in range(1, medicine_count + 1):
+                    name = request.form.get(f'medicine_name_{i}', '').strip()
+                    dosage = request.form.get(f'medicine_dosage_{i}', '').strip()
+                    frequency = request.form.get(f'medicine_frequency_{i}', '').strip()
+                    
+                    if name and dosage and frequency:
+                        morning = '1' if request.form.get(f'medicine_morning_{i}') else '0'
+                        afternoon = '1' if request.form.get(f'medicine_afternoon_{i}') else '0'
+                        evening = '1' if request.form.get(f'medicine_evening_{i}') else '0'
+                        meal = request.form.get(f'medicine_meal_{i}', 'after')
+                        
+                        medicine_str = f"{name}|{dosage}|{frequency}|{morning}|{afternoon}|{evening}|{meal}"
+                        medicines.append(medicine_str)
+                
+                if not medicines:
+                    flash('At least one medicine is required', 'danger')
+                    return redirect(url_for('prescriptions', appointment_id=appointment_id))
+                
+                instructions = request.form.get('instructions', '').strip()
+                medicines_str = '\n'.join(medicines)
+                
+                # Get next appointment details
+                next_appointment_date = request.form.get('next_appointment_date', '').strip()
+                next_appointment_time = request.form.get('next_appointment_time', '').strip()
+
                 existing = conn.execute('''
                     SELECT * FROM prescriptions 
                     WHERE appointment_id = ? AND hospital_id = ?
@@ -891,9 +898,10 @@ def prescriptions(appointment_id):
                 if request.form.get('action') == 'print':
                     return redirect(url_for('print_prescription', appointment_id=appointment_id))
                 return redirect(url_for('prescriptions', appointment_id=appointment_id))
+                
             except Exception as e:
                 conn.rollback()
-                flash('Error saving prescription', 'danger')
+                flash('Error saving prescription: ' + str(e), 'danger')
                 app.logger.error(f"Prescription save error: {str(e)}")
                 return redirect(url_for('prescriptions', appointment_id=appointment_id))
 
